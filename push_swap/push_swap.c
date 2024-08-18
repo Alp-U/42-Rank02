@@ -231,7 +231,8 @@ void	pa(t_list **stack_a, t_list **stack_b)
 		return ;
 	top_b = *stack_b;
 	*stack_b = top_b->next;
-	ft_lstadd_front(stack_a, top_b);
+	top_b->next = *stack_a;
+	*stack_a = top_b;
 }
 
 void	pb(t_list **stack_a, t_list **stack_b)
@@ -242,7 +243,8 @@ void	pb(t_list **stack_a, t_list **stack_b)
 		return ;
 	top_a = *stack_a;
 	*stack_a = top_a->next;
-	ft_lstadd_front(stack_b, top_a);
+	top_a->next = *stack_b;
+	*stack_b = top_a;
 }
 
 void	ra(t_list	**stack_a)
@@ -330,6 +332,57 @@ void	rrr(t_list **stack_a, t_list **stack_b)
 	rra(stack_a);
 	rrb(stack_b);
 }
+void	exec_mtt(int	min_pos, int pos, t_list **stack_a, t_list **stack_b)
+{
+	if (min_pos <= pos / 2)
+    {
+        while (min_pos-- > 0)
+            ra(stack_a);
+    }
+    else
+    {
+        while (pos-- > min_pos)
+            rra(stack_a);
+    }
+	pb(stack_a, stack_b);
+}
+void	min_to_top(t_list **stack_a, t_list **stack_b)
+{
+	long	min;
+	t_list	*current;
+	int	min_pos;
+	int	pos;
+
+	while (ft_lstsize(*stack_a) > 0)
+	{
+		current = *stack_a;
+		pos = 0;
+		min_pos = 0;
+		min = *(long *)(current->content);
+		while (current)
+		{
+			if (min > *(long *)(current->content))
+			{
+				min = *(long *)(current->content);
+				min_pos = pos;
+			}
+			current = current->next;
+			pos++;
+		}
+		exec_mtt(min_pos, pos, stack_a, stack_b);
+	}
+}
+void	back_to_a(t_list **stack_a, t_list **stack_b)
+{
+	while (ft_lstsize(*stack_b) > 0)
+		pa(stack_a, stack_b);
+}
+
+void	push_swap(t_list **stack_a, t_list **stack_b)
+{
+	min_to_top(stack_a, stack_b);
+	back_to_a(stack_a, stack_b);
+}
 
 int	main(int ac, char **av)
 {
@@ -352,7 +405,8 @@ int	main(int ac, char **av)
 	if (ac == 2)
 		free_dptr(input);
 	
-	create_stackb(&stack_b);
+	
+	// create_stackb(&stack_b);
 
 	test_printing(stack_a);
 	printf("\n_\na\n");
@@ -360,7 +414,7 @@ int	main(int ac, char **av)
 	test_printing(stack_b);
 	printf("\n_\nb");
 
-	rrr(&stack_a, &stack_b);
+	push_swap(&stack_a, &stack_b);
 
 	printf("\n\n");
 	test_printing(stack_a);
